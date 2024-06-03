@@ -9,9 +9,9 @@ const port = 3000;
 // Koneksi ke MySQL
 const connection = mysql.createConnection({
   host: 'localhost',
-  user: 'root', // Ganti dengan username MySQL Anda
-  password: '0153', // Ganti dengan password MySQL Anda
-  database: 'petshop' // Ganti dengan nama database Anda
+  user: 'root', 
+  password: '0153', 
+  database: 'petshop' 
 });
 
 connection.connect(err => {
@@ -26,6 +26,74 @@ connection.connect(err => {
 app.use(bodyParser.json());
 app.use(cors());
 
+// Middleware untuk logging request
+app.use((req, res, next) => {
+  console.log(`Request URL: ${req.url}, Method: ${req.method}`);
+  next();
+});
+
+// Endpoint untuk mendapatkan semua produk
+app.get('/api/products', (req, res) => {
+  const sql = `
+    SELECT id_makanan AS id, 'makanan' AS category, nama_makanan AS name, harga_makanan AS price, gambar_makanan AS image FROM makanan
+    UNION ALL
+    SELECT id_aksesoris AS id, 'aksesoris' AS category, nama_aksesoris AS name, harga_aksesoris AS price, gambar_aksesoris AS image FROM aksesoris
+    UNION ALL
+    SELECT id_obat AS id, 'obat' AS category, nama_obat AS name, harga_obat AS price, gambar_obat AS image FROM obat
+  `;
+  connection.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error querying database:', err);
+      res.status(500).send('Error querying database');
+      return;
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint untuk menambahkan produk
+app.post('/api/products', (req, res) => {
+  const { category, name, price, image } = req.body;
+  let sql;
+  if (category === 'makanan') {
+    sql = 'INSERT INTO makanan (nama_makanan, harga_makanan, gambar_makanan) VALUES (?, ?, ?)';
+  } else if (category === 'aksesoris') {
+    sql = 'INSERT INTO aksesoris (nama_aksesoris, harga_aksesoris, gambar_aksesoris) VALUES (?, ?, ?)';
+  } else if (category === 'obat') {
+    sql = 'INSERT INTO obat (nama_obat, harga_obat, gambar_obat) VALUES (?, ?, ?)';
+  }
+  connection.query(sql, [name, price, image], (err, result) => {
+    if (err) {
+      console.error('Error inserting into database:', err);
+      res.status(500).send('Error inserting into database');
+      return;
+    }
+    res.status(201).send('Product added successfully');
+  });
+});
+
+// Endpoint untuk menghapus produk
+app.delete('/api/products/:id', (req, res) => {
+  const { id } = req.params;
+  const { category } = req.body;
+  let sql;
+  if (category === 'makanan') {
+    sql = 'DELETE FROM makanan WHERE id_makanan = ?';
+  } else if (category === 'aksesoris') {
+    sql = 'DELETE FROM aksesoris WHERE id_aksesoris = ?';
+  } else if (category === 'obat') {
+    sql = 'DELETE FROM obat WHERE id_obat = ?';
+  }
+  connection.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting from database:', err);
+      res.status(500).send('Error deleting from database');
+      return;
+    }
+    res.status(200).send('Product deleted successfully');
+  });
+});
+
 // Endpoint untuk mendapatkan data pelanggan
 app.get('/api/pelanggan', (req, res) => {
   connection.query('SELECT * FROM pelanggan', (error, results) => {
@@ -37,29 +105,6 @@ app.get('/api/pelanggan', (req, res) => {
     res.json(results);
   });
 });
-
-//
-app.get('/api/aksesoris', (req, res) => {
-  connection.query('SELECT * FROM aksesoris', (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
-});
-
-app.get('/api/makanan', (req, res) => {
-  connection.query('SELECT * FROM makanan', (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
-});
-
-app.get('/api/obat', (req, res) => {
-  connection.query('SELECT * FROM obat', (err, results) => {
-    if (err) throw err;
-    res.json(results);
-  });
-});
-
 
 // Endpoint untuk pendaftaran
 app.post('/api/register', (req, res) => {
@@ -91,7 +136,7 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-// Endpoint untuk login
+// Endpoint untuk login pengguna
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -106,6 +151,25 @@ app.post('/api/login', (req, res) => {
       res.status(200).send('Login berhasil');
     } else {
       res.status(401).send('Email atau Password salah');
+    }
+  });
+});
+
+// Endpoint untuk login admin
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const loginQuery = 'SELECT * FROM admin WHERE username = ? AND password = ?';
+  connection.query(loginQuery, [username, password], (loginError, loginResults) => {
+    if (loginError) {
+      console.error('Error querying database:', loginError);
+      res.status(500).send('Error querying database');
+      return;
+    }
+    if (loginResults.length > 0) {
+      res.status(200).json({ message: 'Login berhasil', admin: true });
+    } else {
+      res.status(401).send('Username atau Password salah');
     }
   });
 });

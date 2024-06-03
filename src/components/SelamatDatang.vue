@@ -19,6 +19,12 @@
           </button>
         </router-link>
       </div>
+
+      <router-link
+              to="/loginadmin"
+              class="text-primary hover:text-primaryHover"
+              >Login sebagai Admin</router-link
+            >
     </div>
   </div>
 </template>

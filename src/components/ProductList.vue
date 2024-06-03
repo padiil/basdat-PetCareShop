@@ -1,87 +1,44 @@
 <template>
-    <div class="product-list">
-      <h1>Aksesoris</h1>
-      <div v-for="item in aksesoris" :key="item.id_aksesoris" class="product-item">
-        <img :src="item.gambar_aksesoris" alt="gambar aksesoris" />
-        <h2>{{ item.nama_aksesoris }}</h2>
-        <p>Rp {{ item.harga_aksesoris.toLocaleString() }}</p>
-      </div>
-      
-      <h1>Makanan</h1>
-      <div v-for="item in makanan" :key="item.id_makanan" class="product-item">
-        <img :src="item.gambar_makanan" alt="gambar makanan" />
-        <h2>{{ item.nama_makanan }}</h2>
-        <p>Rp {{ item.harga_makanan.toLocaleString() }}</p>
-      </div>
-      
-      <h1>Obat</h1>
-      <div v-for="item in obat" :key="item.id_obat" class="product-item">
-        <img :src="item.gambar_obat" alt="gambar obat" />
-        <h2>{{ item.nama_obat }}</h2>
-        <p>Rp {{ item.harga_obat.toLocaleString() }}</p>
+  <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="grid grid-cols-2 gap-6">
+      <div v-for="item in products" :key="item.id" class="product-item bg-white shadow-md rounded-lg overflow-hidden transition-transform transform hover:scale-105">
+        <img :src="item.image" alt="gambar produk" class="w-full h-48 object-cover"/>
+        <div class="p-4">
+          <h2 class="text-xl font-semibold mb-2">{{ item.name }}</h2>
+          <p class="text-lg text-gray-700">Rp {{ item.price.toLocaleString() }}</p>
+        </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        aksesoris: [],
-        makanan: [],
-        obat: []
-      };
-    },
-    created() {
-      this.fetchData();
-    },
-    methods: {
-      fetchData() {
-        axios.get('http://localhost:3000/api/aksesoris')
-          .then(response => {
-            this.aksesoris = response.data;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-  
-        axios.get('http://localhost:3000/api/makanan')
-          .then(response => {
-            this.makanan = response.data;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-  
-        axios.get('http://localhost:3000/api/obat')
-          .then(response => {
-            this.obat = response.data;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      }
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+
+export default {
+  data() {
+    return {
+      products: []
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      axios.get('http://localhost:3000/api/products')
+        .then(response => {
+          console.log('Data fetched:', response.data);
+          this.products = response.data;
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
-  };
-  </script>
-  
-  <style scoped>
-  .product-list {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
-  .product-item {
-    border: 1px solid #ddd;
-    padding: 16px;
-    margin: 16px;
-    text-align: center;
-  }
-  .product-item img {
-    max-width: 100%;
-    height: auto;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+/* Additional styles if needed */
+</style>

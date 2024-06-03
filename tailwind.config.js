@@ -6,6 +6,8 @@ module.exports = {
       colors: {
         primary: "#2980b9",
         primaryHover: "#1c638e",
+        admin: "#ad9200",
+        adminHover: "#8a7300",
         secondary: "#F875AA",
         secondaryHover: "#d7386e",
         back: "#ecf0f1",
@@ -13,6 +15,7 @@ module.exports = {
       },
       borderRadius: {
         semifull: "80px",
+        semifulladmin: "40px",
         none: "0",
         sm: "0.125rem",
         DEFAULT: "4px",

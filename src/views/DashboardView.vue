@@ -1,6 +1,6 @@
 <template lang="">
   <div>
-    <HeaderDashboard class="fixed right-0 left-0" />
+    <HeaderDashboard class="fixed right-0 left-0 z-20" />
     <div class=" py-24">
       <ProductList />
     </div>
